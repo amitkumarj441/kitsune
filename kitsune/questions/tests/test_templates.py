@@ -24,7 +24,7 @@ from kitsune.questions.tests import (
     TestCaseBase, tags_eq, QuestionFactory, AnswerFactory, AnswerVoteFactory)
 from kitsune.questions.views import UNAPPROVED_TAG, NO_TAG
 from kitsune.search.tests import ElasticTestCase
-from kitsune.sumo.helpers import urlparams
+from kitsune.sumo.templatetags.jinja_helpers import urlparams
 from kitsune.sumo.tests import (
     get, post, attrs_eq, emailmessage_raise_smtp, TestCase, LocalizingClient)
 from kitsune.sumo.urlresolvers import reverse
@@ -1101,6 +1101,21 @@ class QuestionsTemplateTestCase(TestCaseBase):
         response = self.client.get(url)
         eq_(200, response.status_code)
 
+    def test_owner_tab_selected_in_list(self):
+        # Test one tab is selected for no show arg specified
+        questions_list = urlparams(reverse('questions.list', args=['all']))
+        response = self.client.get(questions_list)
+        doc = pq(response.content)
+        eq_(1, len(doc('#owner-tabs > .selected')))
+
+        # Test one tab is selected for all show args
+        show_args = ['needs-attention', 'responded', 'done', 'all']
+        for show_arg in show_args:
+            questions_list = urlparams(reverse('questions.list', args=['all']), show=show_arg)
+            response = self.client.get(questions_list)
+            doc = pq(response.content)
+            eq_(1, len(doc('#owner-tabs > .selected')))
+
     def test_product_filter(self):
         p1 = ProductFactory()
         p2 = ProductFactory()
@@ -1481,6 +1496,22 @@ class AAQTemplateTestCase(TestCaseBase):
         # And no confirmation email was sent (already sent on registration)
         # Note: there was already an email sent above
         eq_(1, len(mail.outbox))
+
+    def test_register_through_aaq_has_csrf(self):
+        """Registration form in the AAQ has a CSRF token"""
+        l = QuestionLocale.objects.get(locale=settings.LANGUAGE_CODE)
+        p = ProductFactory(slug='firefox')
+        p.questions_locales.add(l)
+        TopicFactory(slug='fix-problems', product=p)
+
+        self.client.logout()
+        url = reverse('questions.aaq_step5', args=['desktop', 'fix-problems'])
+        url = urlparams(url, search='test')
+
+        response = self.client.get(url, follow=True)
+        doc = pq(response.content)
+        csrf = doc('#register-form form input[name="csrfmiddlewaretoken"]')
+        eq_(len(csrf), 1)
 
     def test_invalid_product_404(self):
         url = reverse('questions.aaq_step2', args=['lipsum'])

@@ -14,7 +14,7 @@ from django.utils.encoding import iri_to_uri, smart_str, smart_unicode
 
 import mobility
 
-from kitsune.sumo.helpers import urlparams
+from kitsune.sumo.templatetags.jinja_helpers import urlparams
 from kitsune.sumo.urlresolvers import Prefixer, set_url_prefixer, split_path
 from kitsune.sumo.views import handle403
 
@@ -34,9 +34,10 @@ class LocaleURLMiddleware(object):
         set_url_prefixer(prefixer)
         full_path = prefixer.fix(prefixer.shortened_path)
 
-        if 'lang' in request.GET:
+        if request.GET.get('lang', '') in settings.SUMO_LANGUAGES:
             # Blank out the locale so that we can set a new one. Remove lang
             # from the query params so we don't have an infinite loop.
+
             prefixer.locale = ''
             new_path = prefixer.fix(prefixer.shortened_path)
             query = dict((smart_str(k), v) for

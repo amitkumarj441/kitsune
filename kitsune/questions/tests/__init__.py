@@ -60,6 +60,16 @@ class QuestionLocaleFactory(factory.DjangoModelFactory):
     class Meta:
         model = QuestionLocale
 
+    @factory.post_generation
+    def products(obj, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing
+            return
+
+        if extracted is not None:
+            for product in extracted:
+                obj.products.add(product)
+
 
 class AnswerFactory(factory.DjangoModelFactory):
     class Meta:
@@ -69,6 +79,13 @@ class AnswerFactory(factory.DjangoModelFactory):
     created = factory.LazyAttribute(lambda a: datetime.now())
     creator = factory.SubFactory(UserFactory)
     question = factory.SubFactory(QuestionFactory)
+
+
+class SolutionAnswerFactory(AnswerFactory):
+    @factory.post_generation
+    def set_question_solution(obj, create, extracted, **kwargs):
+        obj.question.solution = obj
+        obj.save()
 
 
 class AnswerVoteFactory(factory.DjangoModelFactory):

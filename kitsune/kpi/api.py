@@ -1,5 +1,6 @@
-from operator import itemgetter
+from collections import defaultdict
 from datetime import date, timedelta
+from operator import itemgetter
 
 from django.core.cache import cache
 from django.db import connections, router
@@ -302,6 +303,18 @@ class ExitSurveyMetricList(CachedAPIView):
             results_list, key=itemgetter('date'), reverse=True)]
 
 
+class CSATMetricList(CachedAPIView):
+    """The API list view for contributor CSAT metrics"""
+    code = None
+
+    def get_objects(self, request):
+        kind = MetricKind.objects.get(code=self.code)
+        since = date.today() - timedelta(days=30)
+        metrics = Metric.objects.filter(start__gte=since, kind=kind).order_by('-start')
+
+        return [{'date': m.start, 'csat': m.value} for m in metrics]
+
+
 def _daily_qs_for(model_cls):
     """Return the daily grouped queryset we need for model_cls."""
     # Limit to newer than 2011/1/1 and active creators.
@@ -335,23 +348,33 @@ def _start_date():
 
 def _remap_date_counts(**kwargs):
     """Remap the query result.
-    kwargs = {<label>=[{'count': 45, 'month': 2L, 'year': 2010L},
-     {'count': 12, 'month': 1L, 'year': 2010L},
-      {'count': 1, 'month': 12L, 'year': 2009L},..],
-      <label>=[{...},...],
-      ...}
-    returns
-        [{
+    kwargs = {
+        <label>=[
+            {'count': 45, 'month': 2L, 'year': 2010L},
+            {'count': 6, 'month': 2L, 'year': 2010L},   # Note duplicate date
+            {'count': 12, 'month': 1L, 'year': 2010L},
+            {'count': 1, 'month': 12L, 'year': 2009L},
+            ...
+        ],
+        <label>=[{...},...],
+    }
+    returns [
+        {
             datetime.date(2009, 12, 1): {'<label>': 1},
             datetime.date(2010, 1, 1): {'<label>': 12},
-            datetime.date(2010, 2, 1): {'<label>': 45}
+            datetime.date(2010, 2, 1): {'<label>': 51}  # Note summed counts
             ...
         },
         ...]
     """
     for label, qs in kwargs.iteritems():
-        yield dict((date(x['year'], x['month'], x.get('day', 1)),
-                   {label: x['count']}) for x in qs)
+        res = defaultdict(lambda: {label: 0})
+        # For each date mentioned in qs, sum up the counts for that day
+        # Note: days may be duplicated
+        for x in qs:
+            key = date(x['year'], x['month'], x.get('day', 1))
+            res[key][label] += x['count']
+        yield res
 
 
 def merge_results(**kwargs):

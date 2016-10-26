@@ -12,12 +12,9 @@ echo "Install Python dependencies"
 ./peep.sh install -r requirements/default.txt
 echo
 
-# Installing dependencies for smoke tests
-if [[ $TEST_SUITE == "smoke" ]]; then
-  virtualenv venv_smoketests
-  source venv_smoketests/bin/activate
-  pip install -r smoketests/requirements.txt
-  deactivate
+# Installing dependencies for UI tests
+if [[ $TEST_SUITE == "ui" ]]; then
+  ./peep.sh install -r requirements/test.txt
 fi
 
 # Optimization: None of the rest is needed for lint tests.
@@ -26,7 +23,7 @@ if [[ $TEST_SUITE == "lint" ]]; then
 fi
 
 echo "Installing Node.js dependencies"
-./scripts/lockdown.js
+npm install
 echo
 
 echo "Installing front end dependencies"
@@ -35,6 +32,8 @@ echo
 
 
 echo "Installing ElasticSearch"
+# Default to ES version 1.2.4, but allow overrides from the environment
+ELASTICSEARCH_VERSION=${ELASTICSEARCH_VERSION:-1.2.4}
 es_tarball="vendor/tarballs/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz"
 if [[ ! -f $es_tarball ]]; then
   echo "Invalid version ElasticSearch. Can't find ${es_tarball}."

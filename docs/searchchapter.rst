@@ -4,7 +4,7 @@
 Search
 ======
 
-Kitsune uses `Elasticsearch <http://www.elasticsearch.org/>`_ to
+Kitsune uses `Elasticsearch <https://www.elastic.co/>`_ to
 power its on-site search facility.
 
 It gives us a number of advantages over MySQL's full-text search or
@@ -110,7 +110,7 @@ These settings explained:
 There are a few other settings you can set in your
 ``kitsune/settings_local.py`` file that override ElasticUtils defaults.  See
 `the ElasticUtils docs
-<http://elasticutils.readthedocs.org/en/latest/installation.html#configure>`_
+<https://elasticutils.readthedocs.io/en/latest/django.html#configuration>`_
 for details.
 
 Other things you can change:
@@ -244,7 +244,7 @@ Implementation details
 
 Kitsune uses `elasticutils <https://github.com/mozilla/elasticutils>`_
 and `pyelasticsearch
-<http://pyelasticsearch.readthedocs.org/en/latest/>`_.
+<https://pyelasticsearch.readthedocs.io/en/latest/>`_.
 
 Most of our code is in the ``search`` app in ``kitsune/search/``.
 
@@ -291,7 +291,7 @@ covers how a document is scored in regards to the search query and its
 contents. The weights modify that---they're query-level boosts.
 
 Additionally, `this blog post from 2006 <http://www.supermind.org/blog/378>`_
-is really helpful in terms of provind insight on the implications of
+is really helpful in terms of providing insight on the implications of
 the way things are scored.
 
 

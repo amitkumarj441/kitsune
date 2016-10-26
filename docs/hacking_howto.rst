@@ -82,7 +82,7 @@ These are required for the minimum installation:
 
 * git
 * Python 2.7
-* pip: `<http://www.pip-installer.org/en/latest/>`_
+* pip: `<https://pip.pypa.io/en/latest/>`_
 * virtualenv
 * MariaDB 5.5 server and client headers
 * Memcached Server
@@ -150,7 +150,7 @@ Setting up an Environment
 =========================
 
 It is strongly recommended to run Kitsune in a virtual environment, which is a
-tool to isolate Python environments from eachother and the system. It makes
+tool to isolate Python environments from each other and the system. It makes
 local development much easier, especially when working on multiple projects.
 
 To create a virtual environment::
@@ -183,6 +183,11 @@ required, but are helpful::
 
     $ ./peep.sh install -r requirements/dev.txt
 
+If you intend to run the function UI tests, you will also need to install the
+appropriate dependencies::
+
+    $ ./peep.sh install -r requirements/test.txt
+
 If you have any issues installing via ``peep``, be sure you have the required
 header files from the packages listed in the requirements section above.
 
@@ -201,13 +206,6 @@ Now install the Node.js dependencies with::
     $ npm install
 
 This should create a directory named ``node_modules`` in your git repo.
-
-.. Note::
-
-    If you see a "npm ERR! notarget No valid targets found." error while
-    installing the Node packages, this is due to npm-lockdown being unable to
-    find a package that matches the hash in ``lockdown.json``.
-
 
 Frontend Packages
 -----------------
@@ -325,7 +323,7 @@ to ensure that they render correctly. You have two options here:
 
 - Use gulp to watch for changes and pre-compile (use this if you are making changes to the templates)::
 
-      $ /path/to/gulp watch
+      $ ./node_modules/.bin/gulp watch
 
 
 .. _testing-it-out:

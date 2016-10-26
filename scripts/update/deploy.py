@@ -34,7 +34,7 @@ def update_code(ctx, tag):
 @task
 def update_locales(ctx):
     with ctx.lcd(os.path.join(settings.SRC_DIR, 'locale')):
-        ctx.local("svn up")
+        ctx.local('git pull origin master')
 
     # Run the script that lints the .po files and compiles to .mo the
     # the ones that don't have egregious errors in them. This prints
@@ -58,6 +58,8 @@ def update_assets(ctx):
 @task
 def db_migrations(ctx):
     with ctx.lcd(settings.SRC_DIR):
+        ctx.local('python2.7 manage.py migrate --noinput actstream --fake')
+        ctx.local('python2.7 manage.py migrate --noinput authority --fake')
         ctx.local('python2.7 manage.py migrate --noinput')
 
 
@@ -99,11 +101,12 @@ def update_info(ctx):
         ctx.local("git branch")
         ctx.local("git log -3")
         ctx.local("git status")
-        ctx.local("git submodule status")
         ctx.local("python2.7 manage.py migrate --list")
+
         with ctx.lcd("locale"):
-            ctx.local("svn info")
-            ctx.local("svn status")
+            ctx.local("git branch")
+            ctx.local("git log -3")
+            ctx.local("git status")
 
         ctx.local("git rev-parse HEAD > media/revision.txt")
 
@@ -145,8 +148,8 @@ def pre_update(ctx, ref=settings.UPDATE_REF):
 
 @task
 def update(ctx):
-    update_assets()
     update_locales()
+    update_assets()
     db_migrations()
 
 

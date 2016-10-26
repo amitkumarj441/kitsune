@@ -10,9 +10,9 @@ import mock
 from nose.tools import eq_
 
 from kitsune.products.tests import ProductFactory, TopicFactory
-from kitsune.sumo.helpers import urlparams
-from kitsune.sumo.tests import post, get, attrs_eq, MobileTestCase
-from kitsune.sumo.tests import SumoPyQuery as pq
+from kitsune.sumo.templatetags.jinja_helpers import urlparams
+from kitsune.sumo.tests import post, get, attrs_eq, MobileTestCase, MinimalViewTestCase
+from kitsune.sumo.tests import SumoPyQuery as pq, template_used
 from kitsune.sumo.urlresolvers import reverse
 from kitsune.users.tests import UserFactory, add_permission
 from kitsune.wiki.events import (
@@ -50,8 +50,7 @@ Changes:
 
 --
 Unsubscribe from these emails:
-https://testserver/en-US/unsubscribe/%(watcher)s?s=%(secret)s
-"""
+https://testserver/en-US/unsubscribe/%(watcher)s?s=%(secret)s"""
 
 
 DOCUMENT_EDITED_EMAIL_CONTENT = u"""\
@@ -75,8 +74,7 @@ Changes:
 
 --
 Unsubscribe from these emails:
-https://testserver/en-US/unsubscribe/%(watcher)s?s=%(secret)s
-"""
+https://testserver/en-US/unsubscribe/%(watcher)s?s=%(secret)s"""
 
 
 APPROVED_EMAIL_CONTENT = u"""\
@@ -98,8 +96,7 @@ Changes:
 
 --
 Unsubscribe from these emails:
-https://testserver/en-US/unsubscribe/%(watcher)s?s=%(secret)s
-"""
+https://testserver/en-US/unsubscribe/%(watcher)s?s=%(secret)s"""
 
 
 class DocumentTests(TestCaseBase):
@@ -418,6 +415,16 @@ class DocumentTests(TestCaseBase):
         # Check that content is available in bn-BD
         eq_(pq(trans_doc.html)('div').text(), doc('#doc-content div').text())
 
+    def test_document_share_link_escape(self):
+        """Ensure that the share link isn't escaped."""
+        r = ApprovedRevisionFactory(
+            content='Test',
+            document__share_link='https://www.example.org',
+        )
+        response = self.client.get(r.document.get_absolute_url())
+        doc = pq(response.content)
+        eq_(doc('.wiki-doc .share-link a').attr('href'), 'https://www.example.org')
+
 
 class MobileArticleTemplate(MobileTestCase):
     def setUp(self):
@@ -429,7 +436,33 @@ class MobileArticleTemplate(MobileTestCase):
         r = ApprovedRevisionFactory(content='Some text.')
         response = self.client.get(r.document.get_absolute_url())
         eq_(200, response.status_code)
-        self.assertTemplateUsed(response, 'wiki/mobile/document.html')
+        assert template_used(response, 'wiki/mobile/document.html')
+
+    def test_document_share_link_escape(self):
+        """Ensure that the share link isn't escaped."""
+        r = ApprovedRevisionFactory(
+            content='Test',
+            document__share_link='https://www.example.org',
+        )
+        response = self.client.get(r.document.get_absolute_url())
+        doc = pq(response.content)
+        eq_(doc('#wiki-doc .share-link a').attr('href'), 'https://www.example.org')
+
+
+class MinimalArticleTemplate(MinimalViewTestCase):
+    def setUp(self):
+        super(MinimalArticleTemplate, self).setUp()
+        ProductFactory()
+
+    def test_document_share_link_escape(self):
+        """Ensure that the share link isn't escaped."""
+        r = ApprovedRevisionFactory(
+            content='Test',
+            document__share_link='https://www.example.org',
+        )
+        response = self.client.get(self.get_minimal_url(r.document))
+        doc = pq(response.content)
+        eq_(doc('#wiki-doc .share-link a').attr('href'), 'https://www.example.org')
 
 
 class RevisionTests(TestCaseBase):
@@ -1023,7 +1056,7 @@ class NewRevisionTests(TestCaseBase):
         eq_(200, trans_resp.status_code)
         trans_content = pq(trans_resp.content)
         eq_(0, len(trans_content('.user-messages li')))
-        eq_(1, len(trans_content('.submit .btn-draft')))
+        eq_(2, len(trans_content('.submit .btn-draft')))
 
     def test_restore_draft_revision(self):
         draft = DraftRevisionFactory(creator=self.user)
@@ -1111,7 +1144,7 @@ class NewRevisionTests(TestCaseBase):
         trans_resp = self.client.get(trans_url, draft_request)
         trans_content = pq(trans_resp.content)
         # Check there is a warning message
-        eq_(1, len(trans_content('.user-messages li')))
+        eq_(1, len(trans_content('.user-messages li.draft-warning')))
 
 
 class HistoryTests(TestCaseBase):

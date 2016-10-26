@@ -20,7 +20,7 @@ from kitsune.kbadge.tests import AwardFactory, BadgeFactory
 from kitsune.questions.events import QuestionReplyEvent
 from kitsune.questions.tests import QuestionFactory
 from kitsune.sumo.urlresolvers import reverse
-from kitsune.sumo.helpers import urlparams
+from kitsune.sumo.templatetags.jinja_helpers import urlparams
 from kitsune.sumo.tests import post, get
 from kitsune.users import ERROR_SEND_EMAIL
 from kitsune.users.forms import PasswordResetForm
@@ -156,6 +156,13 @@ class LoginTests(TestCaseBase):
         eq_(200, response.status_code)
         doc = pq(response.content)
         assert '"Contributor - Admin"' in doc('body').attr('data-ga-push')
+
+    def test_login_mobile_csrf(self):
+        """The mobile login view should have a CSRF token."""
+        response = self.client.get(reverse('users.login'), {'mobile': 1})
+        eq_(200, response.status_code)
+        doc = pq(response.content)
+        assert doc('#content form input[name="csrfmiddlewaretoken"]')
 
 
 class PasswordResetTests(TestCaseBase):

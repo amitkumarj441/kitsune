@@ -74,6 +74,9 @@ class Profile(ModelBase, SearchMixin):
         default=False, help_text=_lazy(u'Has been sent a first revision contribution email.'))
     involved_from = models.DateField(null=True, blank=True,
                                      verbose_name=_lazy(u'Involved with Mozilla from'))
+    csat_email_sent = models.DateField(null=True, blank=True,
+                                       verbose_name=_lazy(u'When the user was sent a community '
+                                                          u'health survey'))
 
     class Meta(object):
         permissions = (('view_karma_points', 'Can view karma points'),
@@ -265,7 +268,7 @@ class UserMappingType(SearchMappingType):
         d['idisplay_name'] = obj.display_name.lower()
         d['itwitter_usernames'] = [u.lower() for u in obj.twitter_usernames]
 
-        from kitsune.users.helpers import profile_avatar
+        from kitsune.users.templatetags.jinja_helpers import profile_avatar
         d['avatar'] = profile_avatar(obj.user, size=120)
 
         d['suggest'] = {

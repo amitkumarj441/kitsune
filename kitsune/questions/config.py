@@ -161,7 +161,7 @@ products = SortedDict([
 
     ('ios', {
         'name': _lazy(u'Firefox for iOS'),
-        'subtitle': 'Firefox for iPhone, iPad and iPod touch devices',
+        'subtitle': _lazy(u'Firefox for iPhone, iPad and iPod touch devices'),
         'extra_fields': ['ff_version', 'os', 'plugins'],
         'tags': ['ios'],
         'product': 'ios',
@@ -186,7 +186,7 @@ products = SortedDict([
 
     ('focus', {
         'name': _lazy(u'Focus by Firefox'),
-        'subtitle': 'Content blocker for Safari',
+        'subtitle': _lazy(u'Content blocker for Safari'),
         'extra_fields': [],
         'tags': ['focus-firefox'],
         'product': 'focus-firefox',
@@ -201,7 +201,7 @@ products = SortedDict([
 
     ('firefox-os', {
         'name': _lazy(u'Firefox OS'),
-        'subtitle': 'Mobile OS for smartphones',
+        'subtitle': _lazy(u'Mobile OS for smartphones'),
         'extra_fields': ['device', 'os'],
         'tags': [],
         'product': 'firefox-os',
@@ -230,7 +230,7 @@ products = SortedDict([
 
     ('webmaker', {
         'name': _lazy(u'Webmaker'),
-        'subtitle': _lazy('Tools for creating and teaching the web'),
+        'subtitle': _lazy(u'Tools for creating and teaching the web'),
         'extra_fields': [],
         'tags': [],
         'product': 'webmaker',
@@ -267,7 +267,7 @@ products = SortedDict([
 
     ('thunderbird', {
         'name': _lazy(u'Thunderbird'),
-        'subtitle': 'Email software for Windows, Mac and Linux',
+        'subtitle': _lazy(u'Email software for Windows, Mac and Linux'),
         'extra_fields': [],
         'tags': [],
         'product': 'thunderbird',
@@ -297,7 +297,7 @@ products = SortedDict([
                 'tags': ['fix-problems'],
             }),
             ('calendar', {
-                'name': _lazy('Calendar'),
+                'name': _lazy(u'Calendar'),
                 'topic': 'calendar',
                 'tags': ['calendar'],
             }),
@@ -312,17 +312,17 @@ products = SortedDict([
     ('other', {
         'name': _lazy(u'Other Mozilla products'),
         'subtitle': '',
-        'html': 'This site is only provides support for some of our products. '
-                'For other support, please find your product below.'
-                '<ul class="product-support">'
-                '<li><a href="http://www.seamonkey-project.org/doc/">'
-                'SeaMonkey support</a></li>'
-                '<li><a href="http://caminobrowser.org/help/">'
-                'Camino support</a></li>'
-                '<li><a '
-                'href="http://www.mozilla.org/projects/calendar/faq.html">'
-                'Lightning and Sunbird support</a></li>'
-                '</ul>',
+        'html': _lazy(u'This site only provides support for some of our products. '
+                      u'For other support, please find your product below.'
+                      u'<ul class="product-support">'
+                      u'<li><a href="http://www.seamonkey-project.org/doc/">'
+                      u'SeaMonkey support</a></li>'
+                      u'<li><a href="http://caminobrowser.org/help/">'
+                      u'Camino support</a></li>'
+                      u'<li><a '
+                      u'href="http://www.mozilla.org/projects/calendar/faq.html">'
+                      u'Lightning and Sunbird support</a></li>'
+                      u'</ul>'),
         'categories': SortedDict([]),
         'deadend': True,
     }),
